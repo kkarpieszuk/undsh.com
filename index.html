@@ -206,6 +206,10 @@
       z-index: 20;
     }
 
+    .consent-banner[hidden] {
+      display: none;
+    }
+
     .consent-text {
       margin: 0;
       color: var(--muted);
@@ -321,14 +325,30 @@
       window.gtag("config", GA_ID);
     }
 
+    function getStoredConsent() {
+      try {
+        return localStorage.getItem(CONSENT_KEY);
+      } catch {
+        return null;
+      }
+    }
+
+    function storeConsent(value) {
+      try {
+        localStorage.setItem(CONSENT_KEY, value);
+      } catch {
+        // Ignore storage errors (e.g. file:// restrictions).
+      }
+    }
+
     function setAnalyticsConsent(value) {
-      localStorage.setItem(CONSENT_KEY, value);
+      storeConsent(value);
       consentBanner.hidden = true;
       if (value === "accepted") enableAnalytics();
     }
 
     function initConsent() {
-      const current = localStorage.getItem(CONSENT_KEY);
+      const current = getStoredConsent();
       if (current === "accepted") {
         enableAnalytics();
         consentBanner.hidden = true;
