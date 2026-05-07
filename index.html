@@ -132,6 +132,15 @@
       color: var(--muted);
       margin-top: 1.5rem;
     }
+
+    .hint code {
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-size: 0.88em;
+      padding: 0.12em 0.35em;
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -154,6 +163,7 @@
     </div>
 
     <p class="hint">Only the result text above is copied to the clipboard.</p>
+    <p class="hint"><strong>Tip:</strong> Paste your text in the box at the top, or add it to the page URL right after a <code>#</code>.</p>
   </main>
 
   <script>
@@ -166,6 +176,22 @@
       return text.split(EM_DASH).join("-");
     }
 
+    function textFromLocationHash() {
+      const encoded = location.hash.slice(1);
+      if (!encoded) return null;
+      try {
+        return decodeURIComponent(encoded);
+      } catch {
+        return encoded;
+      }
+    }
+
+    function applyHashToInput() {
+      const decoded = textFromLocationHash();
+      if (decoded !== null) input.value = decoded;
+      refresh();
+    }
+
     function refresh() {
       const raw = input.value;
       const out = replaceDashes(raw);
@@ -174,6 +200,8 @@
     }
 
     input.addEventListener("input", refresh);
+
+    window.addEventListener("hashchange", applyHashToInput);
 
     copyBtn.addEventListener("click", async () => {
       const text = preview.textContent;
@@ -193,7 +221,7 @@
       }
     });
 
-    refresh();
+    applyHashToInput();
   </script>
 </body>
 </html>
