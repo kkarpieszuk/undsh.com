@@ -146,7 +146,7 @@
 <body>
   <main>
     <h1>undsh.com</h1>
-    <p class="lead">Em dashes (—) are replaced with a hyphen (-).</p>
+    <p class="lead">Did AI give you text full of em dashes (—)? Paste it below and swap them for normal hyphens (-).</p>
 
     <div>
       <label for="input">Paste your text</label>
@@ -190,6 +190,7 @@
       const decoded = textFromLocationHash();
       if (decoded !== null) input.value = decoded;
       refresh();
+      if (decoded === null) input.focus();
     }
 
     function refresh() {
