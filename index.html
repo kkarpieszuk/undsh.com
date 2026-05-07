@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>undsh.com</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a222c;
+      --border: #2d3a47;
+      --text: #e8edf2;
+      --muted: #8b9aad;
+      --accent: #5eb3f6;
+      --accent-hover: #7ec4ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    main {
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.5rem;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0 0 1.75rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 10rem;
+      padding: 0.875rem 1rem;
+      font: inherit;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(94, 179, 246, 0.2);
+    }
+
+    .output-wrap {
+      margin-top: 1.5rem;
+    }
+
+    .output {
+      min-height: 3rem;
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+    }
+
+    .output:empty::before {
+      content: "…";
+      color: var(--muted);
+    }
+
+    .actions {
+      margin-top: 1.25rem;
+    }
+
+    button {
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 0.65rem 1.25rem;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--accent-hover);
+    }
+
+    button:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(94, 179, 246, 0.35);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>undsh.com</h1>
+    <p class="lead">Em dashes (—) are replaced with a hyphen (-).</p>
+
+    <div>
+      <label for="input">Paste your text</label>
+      <textarea id="input" placeholder="Paste or type your text here…" autocomplete="off" spellcheck="true"></textarea>
+    </div>
+
+    <div class="output-wrap">
+      <label for="preview">Result</label>
+      <div id="preview" class="output" aria-live="polite"></div>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="copy" disabled>Copy</button>
+    </div>
+
+    <p class="hint">Only the result text above is copied to the clipboard.</p>
+  </main>
+
+  <script>
+    const EM_DASH = "\u2014";
+    const input = document.getElementById("input");
+    const preview = document.getElementById("preview");
+    const copyBtn = document.getElementById("copy");
+
+    function replaceDashes(text) {
+      return text.split(EM_DASH).join("-");
+    }
+
+    function refresh() {
+      const raw = input.value;
+      const out = replaceDashes(raw);
+      preview.textContent = out;
+      copyBtn.disabled = out.length === 0;
+    }
+
+    input.addEventListener("input", refresh);
+
+    copyBtn.addEventListener("click", async () => {
+      const text = preview.textContent;
+      if (!text) return;
+      const label = copyBtn.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = "Copied";
+        setTimeout(() => {
+          copyBtn.textContent = "Copy";
+        }, 1600);
+      } catch {
+        copyBtn.textContent = "Copy failed";
+        setTimeout(() => {
+          copyBtn.textContent = label;
+        }, 2000);
+      }
+    });
+
+    refresh();
+  </script>
+</body>
+</html>
