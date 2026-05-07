@@ -188,6 +188,47 @@
       color: var(--text);
 
     }
+
+    .consent-banner {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(42rem, calc(100% - 2rem));
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.7rem;
+      z-index: 20;
+    }
+
+    .consent-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      flex: 1 1 20rem;
+    }
+
+    .consent-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .consent-btn {
+      padding: 0.45rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+    }
+
+    .consent-btn.reject {
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
@@ -215,7 +256,17 @@
     <p class="hint"><strong>Tip:</strong> Paste your text in the box at the top, or add it to the page URL right after a <code>#</code>.</p>
   </main>
 
+  <div id="consent-banner" class="consent-banner" hidden>
+    <p class="consent-text">This site uses cookies.</p>
+    <div class="consent-actions">
+      <button type="button" id="consent-reject" class="consent-btn reject">Reject</button>
+      <button type="button" id="consent-accept" class="consent-btn">Accept</button>
+    </div>
+  </div>
+
   <script>
+    const GA_ID = "G-0DSMDPGGCT";
+    const CONSENT_KEY = "undsh.analyticsConsent";
     const EM_DASH = "\u2014";
     const LEADING_EMOJI_RE = /^(?:\s*[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?(?:\u200D[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?)*)+/u;
     const ALL_EMOJI_RE = /(?:[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?(?:\u200D[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?)*)/gu;
@@ -223,6 +274,9 @@
     const input = document.getElementById("input");
     const preview = document.getElementById("preview");
     const copyBtn = document.getElementById("copy");
+    const consentBanner = document.getElementById("consent-banner");
+    const consentRejectBtn = document.getElementById("consent-reject");
+    const consentAcceptBtn = document.getElementById("consent-accept");
     const toggleDashBtn = document.getElementById("toggle-dash");
     const toggleEmojiBtn = document.getElementById("toggle-emoji");
     const options = {
@@ -250,6 +304,41 @@
     function syncToggleButtons() {
       toggleDashBtn.setAttribute("aria-pressed", String(options.unEmDash));
       toggleEmojiBtn.setAttribute("aria-pressed", String(options.unEmojify));
+    }
+
+    function enableAnalytics() {
+      if (window.gtag) return;
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+      document.head.appendChild(script);
+
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function gtag() {
+        window.dataLayer.push(arguments);
+      };
+      window.gtag("js", new Date());
+      window.gtag("config", GA_ID);
+    }
+
+    function setAnalyticsConsent(value) {
+      localStorage.setItem(CONSENT_KEY, value);
+      consentBanner.hidden = true;
+      if (value === "accepted") enableAnalytics();
+    }
+
+    function initConsent() {
+      const current = localStorage.getItem(CONSENT_KEY);
+      if (current === "accepted") {
+        enableAnalytics();
+        consentBanner.hidden = true;
+        return;
+      }
+      if (current === "rejected") {
+        consentBanner.hidden = true;
+        return;
+      }
+      consentBanner.hidden = false;
     }
 
     function textFromLocationHash() {
@@ -293,6 +382,8 @@
     });
 
     window.addEventListener("hashchange", applyHashToInput);
+    consentAcceptBtn.addEventListener("click", () => setAnalyticsConsent("accepted"));
+    consentRejectBtn.addEventListener("click", () => setAnalyticsConsent("rejected"));
 
     copyBtn.addEventListener("click", async () => {
       const text = preview.textContent;
@@ -314,6 +405,7 @@
 
     syncToggleButtons();
     applyHashToInput();
+    initConsent();
   </script>
 </body>
 </html>
