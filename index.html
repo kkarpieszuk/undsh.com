@@ -76,6 +76,38 @@
       box-shadow: 0 0 0 3px rgba(94, 179, 246, 0.2);
     }
 
+    .tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+    }
+
+    .toggle-btn {
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--surface);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .toggle-btn:hover {
+      background: #25313d;
+    }
+
+    .toggle-btn[aria-pressed="true"] {
+      background: var(--accent);
+      border-color: transparent;
+      color: var(--bg);
+    }
+
+    .toggle-btn[aria-pressed="true"]::before {
+      content: "✓ ";
+      font-weight: 700;
+    }
+
     .output-wrap {
       margin-top: 1.5rem;
     }
@@ -166,6 +198,10 @@
     <div>
       <label for="input">Paste your text</label>
       <textarea id="input" placeholder="Paste or type your text here…" autocomplete="off" spellcheck="true"></textarea>
+      <div class="tools" aria-label="Text cleanup options">
+        <button type="button" id="toggle-dash" class="toggle-btn" aria-pressed="true">un-em-dash</button>
+        <button type="button" id="toggle-emoji" class="toggle-btn" aria-pressed="false">de-emojify</button>
+      </div>
     </div>
 
     <div class="output-wrap">
@@ -181,12 +217,39 @@
 
   <script>
     const EM_DASH = "\u2014";
+    const LEADING_EMOJI_RE = /^(?:\s*[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?(?:\u200D[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?)*)+/u;
+    const ALL_EMOJI_RE = /(?:[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?(?:\u200D[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?)*)/gu;
+    const SPACE_PLUS_EMOJI_RE = /[ \t]+(?:[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?(?:\u200D[\p{Extended_Pictographic}\p{Emoji_Presentation}](?:\uFE0F|\uFE0E)?)*)/gu;
     const input = document.getElementById("input");
     const preview = document.getElementById("preview");
     const copyBtn = document.getElementById("copy");
+    const toggleDashBtn = document.getElementById("toggle-dash");
+    const toggleEmojiBtn = document.getElementById("toggle-emoji");
+    const options = {
+      unEmDash: true,
+      unEmojify: false,
+    };
 
     function replaceDashes(text) {
       return text.split(EM_DASH).join("-");
+    }
+
+    function stripEmoji(text) {
+      return text
+        .split("\n")
+        .map((line) => {
+          const hadLeadingEmoji = LEADING_EMOJI_RE.test(line);
+          const withoutEmoji = line
+            .replace(SPACE_PLUS_EMOJI_RE, "")
+            .replace(ALL_EMOJI_RE, "");
+          return hadLeadingEmoji ? `-${withoutEmoji}` : withoutEmoji;
+        })
+        .join("\n");
+    }
+
+    function syncToggleButtons() {
+      toggleDashBtn.setAttribute("aria-pressed", String(options.unEmDash));
+      toggleEmojiBtn.setAttribute("aria-pressed", String(options.unEmojify));
     }
 
     function textFromLocationHash() {
@@ -208,7 +271,9 @@
 
     function refresh() {
       const raw = input.value;
-      const out = replaceDashes(raw);
+      let out = raw;
+      if (options.unEmDash) out = replaceDashes(out);
+      if (options.unEmojify) out = stripEmoji(out);
       preview.textContent = out;
       const isEmpty = out.length === 0;
       copyBtn.hidden = isEmpty;
@@ -216,6 +281,16 @@
     }
 
     input.addEventListener("input", refresh);
+    toggleDashBtn.addEventListener("click", () => {
+      options.unEmDash = !options.unEmDash;
+      syncToggleButtons();
+      refresh();
+    });
+    toggleEmojiBtn.addEventListener("click", () => {
+      options.unEmojify = !options.unEmojify;
+      syncToggleButtons();
+      refresh();
+    });
 
     window.addEventListener("hashchange", applyHashToInput);
 
@@ -237,6 +312,7 @@
       }
     });
 
+    syncToggleButtons();
     applyHashToInput();
   </script>
 </body>
