@@ -76,6 +76,18 @@
       box-shadow: 0 0 0 3px rgba(94, 179, 246, 0.2);
     }
 
+    .input-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-header label {
+      margin-bottom: 0;
+    }
+
     .tools {
       display: flex;
       flex-wrap: wrap;
@@ -173,6 +185,12 @@
       font-size: 0.85rem;
     }
 
+    .example-btn {
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+    }
+
     .hint {
       font-size: 0.8rem;
       color: var(--muted);
@@ -241,7 +259,10 @@
     <p class="lead">Using AI to generate text? Here you can clean it up by removing em dashes and emoji.</p>
 
     <div>
-      <label for="input">Paste your text</label>
+      <div class="input-header">
+        <label for="input">Paste your text</label>
+        <button type="button" id="example-text-btn" class="example-btn">See example</button>
+      </div>
       <textarea id="input" placeholder="Paste or type your text here…" autocomplete="off" spellcheck="true"></textarea>
       <div class="tools" aria-label="Text cleanup options">
         <button type="button" id="toggle-dash" class="toggle-btn" aria-pressed="true">un-em-dash</button>
@@ -278,6 +299,7 @@
     const input = document.getElementById("input");
     const preview = document.getElementById("preview");
     const copyBtn = document.getElementById("copy");
+    const exampleTextBtn = document.getElementById("example-text-btn");
     const consentBanner = document.getElementById("consent-banner");
     const consentRejectBtn = document.getElementById("consent-reject");
     const consentAcceptBtn = document.getElementById("consent-accept");
@@ -287,6 +309,7 @@
       unEmDash: true,
       unEmojify: false,
     };
+    const EXAMPLE_TEXT = "Here’s how ridiculously easy it is to remove em dashes — and random emoji 🤖✨🔥 from AI-generated text 😅 — clean it up — and make it sound human again 🚀🧹";
 
     function replaceDashes(text) {
       return text.split(EM_DASH).join("-");
@@ -390,6 +413,12 @@
     }
 
     input.addEventListener("input", refresh);
+    exampleTextBtn.addEventListener("click", () => {
+      input.value = EXAMPLE_TEXT;
+      options.unEmojify = true;
+      syncToggleButtons();
+      refresh();
+    });
     toggleDashBtn.addEventListener("click", () => {
       options.unEmDash = !options.unEmDash;
       syncToggleButtons();
