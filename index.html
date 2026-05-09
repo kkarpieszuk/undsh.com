@@ -197,6 +197,22 @@
       margin-top: 1.5rem;
     }
 
+    .about {
+      margin-top: 1.75rem;
+      color: var(--muted);
+    }
+
+    .about h2 {
+      margin: 0 0 0.45rem;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .about p {
+      margin: 0;
+      font-size: 0.88rem;
+    }
+
     .hint code {
       font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
       font-size: 0.88em;
@@ -278,7 +294,21 @@
       <div id="preview" class="output" aria-live="polite"></div>
     </div>
 
-    <p class="hint"><strong>Tip:</strong> Paste your text in the box at the top, or add it to the page URL right after a <code>#</code>.</p>
+    <section class="about" aria-labelledby="about-title">
+      <h2 id="about-title">What is this about?</h2>
+      <p>
+        AI writing tools love using em dashes (—), while most people naturally type a regular hyphen (-). Em dashes are
+        technically fine, but they can be a visual giveaway that the text came from AI, because many people do not even
+        know how to type anything other than a regular hyphen. When someone spots a lot of em dashes, they often assume
+        it is machine-written right away. Paste your generated text here and copy the "cleaned" version before you share
+        it and accidentally look lazy.
+      </p>
+      <p>
+        You can also de-emojify the text - multiple emoji characters is the second most common giveaway that the text came from AI.
+      </p>
+    </section>
+
+    <p class="hint"><strong>Tip:</strong> Instead of pasting your text in the box at the top, you can add it to the page URL right after a <code>#</code>.</p>
   </main>
 
   <div id="consent-banner" class="consent-banner" hidden>
