@@ -427,9 +427,15 @@
 
     function applyHashToInput() {
       const decoded = textFromLocationHash();
-      if (decoded !== null) input.value = decoded;
-      refresh();
-      if (decoded === null) input.focus();
+      if (decoded !== null) {
+        input.value = decoded;
+        refresh();
+        return;
+      }
+      requestAnimationFrame(() => {
+        refresh();
+        input.focus({ preventScroll: true });
+      });
     }
 
     function refresh() {
