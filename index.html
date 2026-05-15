@@ -471,9 +471,9 @@
     consentAcceptBtn.addEventListener("click", () => setAnalyticsConsent("accepted"));
     consentRejectBtn.addEventListener("click", () => setAnalyticsConsent("rejected"));
 
-    copyBtn.addEventListener("click", async () => {
+    async function copyResult() {
       const text = preview.textContent;
-      if (!text) return;
+      if (!text) return false;
       const label = copyBtn.textContent;
       try {
         await navigator.clipboard.writeText(text);
@@ -481,12 +481,30 @@
         setTimeout(() => {
           copyBtn.textContent = "Copy result to clipboard";
         }, 1600);
+        return true;
       } catch {
         copyBtn.textContent = "Copy failed";
         setTimeout(() => {
           copyBtn.textContent = label;
         }, 2000);
+        return false;
       }
+    }
+
+    copyBtn.addEventListener("click", () => copyResult());
+
+    document.addEventListener("keydown", (e) => {
+      if (!(e.ctrlKey || e.metaKey) || e.key !== "c") return;
+      if (copyBtn.hidden) return;
+      const active = document.activeElement;
+      if (
+        active === input &&
+        input.selectionStart !== input.selectionEnd
+      ) {
+        return;
+      }
+      e.preventDefault();
+      copyResult();
     });
 
     syncToggleButtons();
