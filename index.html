@@ -284,6 +284,7 @@
       <div class="tools" aria-label="Text cleanup options">
         <button type="button" id="toggle-dash" class="toggle-btn" aria-pressed="true">un-em-dash</button>
         <button type="button" id="toggle-emoji" class="toggle-btn" aria-pressed="false">de-emojify</button>
+        <button type="button" id="toggle-quote" class="toggle-btn" aria-pressed="false">pretty-quote</button>
       </div>
     </div>
 
@@ -336,16 +337,22 @@
     const consentAcceptBtn = document.getElementById("consent-accept");
     const toggleDashBtn = document.getElementById("toggle-dash");
     const toggleEmojiBtn = document.getElementById("toggle-emoji");
+    const toggleQuoteBtn = document.getElementById("toggle-quote");
     const options = {
       unEmDash: true,
       unEmojify: false,
+      prettyQuote: false,
     };
-    const EXAMPLE_TEXT = "Here’s how ridiculously easy it is to remove em dashes — and random emoji 🤖✨🔥 from AI-generated text 😅 — clean it up — and make it sound human again 🚀🧹";
+    const EXAMPLE_TEXT = "Here’s how ridiculously easy it is to remove em dashes — and random emoji 🤖✨🔥 from „AI-generated text\"😅 — clean it up — and make it sound human again 🚀🧹";
     const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
     const COPY_BTN_LABEL = `Copy result to clipboard (${isMac ? "Cmd+C" : "Ctrl+C"})`;
 
     function replaceDashes(text) {
       return text.split(EM_DASH).join("-");
+    }
+
+    function prettyQuotes(text) {
+      return text.replace(/„([^"]*?)"/g, "„$1”");
     }
 
     function stripEmoji(text) {
@@ -364,6 +371,7 @@
     function syncToggleButtons() {
       toggleDashBtn.setAttribute("aria-pressed", String(options.unEmDash));
       toggleEmojiBtn.setAttribute("aria-pressed", String(options.unEmojify));
+      toggleQuoteBtn.setAttribute("aria-pressed", String(options.prettyQuote));
     }
 
     function enableAnalytics() {
@@ -445,6 +453,7 @@
       let out = raw;
       if (options.unEmDash) out = replaceDashes(out);
       if (options.unEmojify) out = stripEmoji(out);
+      if (options.prettyQuote) out = prettyQuotes(out);
       preview.textContent = out;
       const isEmpty = out.length === 0;
       copyBtn.hidden = isEmpty;
@@ -455,6 +464,7 @@
     exampleTextBtn.addEventListener("click", () => {
       input.value = EXAMPLE_TEXT;
       options.unEmojify = true;
+      options.prettyQuote = true;
       syncToggleButtons();
       refresh();
     });
@@ -465,6 +475,11 @@
     });
     toggleEmojiBtn.addEventListener("click", () => {
       options.unEmojify = !options.unEmojify;
+      syncToggleButtons();
+      refresh();
+    });
+    toggleQuoteBtn.addEventListener("click", () => {
+      options.prettyQuote = !options.prettyQuote;
       syncToggleButtons();
       refresh();
     });
